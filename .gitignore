@@ -1,0 +1,4 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+infrastructure/terraform/k8s-private-key.pem
