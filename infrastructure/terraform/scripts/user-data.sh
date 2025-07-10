@@ -30,15 +30,30 @@ snap install amazon-ssm-agent --classic
 systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
 systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
 
-# Set hostname based on instance type (helps identify nodes)
-INSTANCE_TYPE=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+# Get metadata using IMDSv2 tokens
+get_metadata() {
+    local path=$1
+    local token=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" --max-time 5 2>/dev/null)
+    if [ -n "$token" ]; then
+        curl -H "X-aws-ec2-metadata-token: $token" "http://169.254.169.254/latest/meta-data/$path" --max-time 5 2>/dev/null
+    else
+        # Fallback to IMDSv1 if token fails
+        curl -s "http://169.254.169.254/latest/meta-data/$path" --max-time 5 2>/dev/null
+    fi
+}
 
-if [[ $INSTANCE_TYPE == *"g4dn"* ]]; then
+# Set hostname based on instance type (helps identify nodes)
+INSTANCE_TYPE=$(get_metadata "instance-type")
+INSTANCE_ID=$(get_metadata "instance-id")
+
+if [[ "$INSTANCE_TYPE" == *"g4dn"* ]]; then
     hostnamectl set-hostname "${hostname_prefix}-gpu-worker"
-elif [[ $INSTANCE_TYPE == "t3.medium" ]]; then
+elif [[ "$INSTANCE_TYPE" == *"t3"* ]]; then
     # We'll distinguish master vs worker in Phase 2
-    hostnamectl set-hostname "${hostname_prefix}-node-$INSTANCE_ID"
+    hostnamectl set-hostname "${hostname_prefix}-node-${INSTANCE_ID}"
+else
+    # Fallback if instance type detection fails
+    hostnamectl set-hostname "${hostname_prefix}-node-${INSTANCE_ID:-unknown}"
 fi
 
 # Add hostname to /etc/hosts (prevents hostname resolution issues)
@@ -68,3 +83,4 @@ sysctl --system
 
 # Signal completion (useful for debugging boot issues)
 echo "User data script completed at $(date)" > /var/log/user-data-completion.log
+echo "Instance type: $INSTANCE_TYPE, Instance ID: $INSTANCE_ID" >> /var/log/user-data-completion.log
