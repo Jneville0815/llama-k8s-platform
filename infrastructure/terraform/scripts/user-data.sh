@@ -46,14 +46,11 @@ get_metadata() {
 INSTANCE_TYPE=$(get_metadata "instance-type")
 INSTANCE_ID=$(get_metadata "instance-id")
 
-if [[ "$INSTANCE_TYPE" == *"g4dn"* ]]; then
+if [[ $INSTANCE_TYPE == *"g4dn"* ]]; then
     hostnamectl set-hostname "${hostname_prefix}-gpu-worker"
-elif [[ "$INSTANCE_TYPE" == *"t3"* ]]; then
+elif [[ $INSTANCE_TYPE == "t3.medium" ]]; then
     # We'll distinguish master vs worker in Phase 2
-    hostnamectl set-hostname "${hostname_prefix}-node-${INSTANCE_ID}"
-else
-    # Fallback if instance type detection fails
-    hostnamectl set-hostname "${hostname_prefix}-node-${INSTANCE_ID:-unknown}"
+    hostnamectl set-hostname "${hostname_prefix}-node-$INSTANCE_ID"
 fi
 
 # Add hostname to /etc/hosts (prevents hostname resolution issues)
