@@ -17,6 +17,14 @@ resource "aws_security_group" "k8s_master" {
     cidr_blocks = [local.my_ip]
   }
 
+  ingress {
+    description = "ICMP from VPC"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = [local.vpc_cidr]
+  }
+
   # Kubernetes API server
   ingress {
     description = "Kubernetes API"
@@ -81,6 +89,14 @@ resource "aws_security_group" "k8s_worker" {
   name_prefix = "${var.repository_name}-k8s-worker-"
   vpc_id      = module.vpc.vpc_id
   description = "Security group for Kubernetes worker nodes"
+
+  ingress {
+    description = "ICMP from VPC"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = [local.vpc_cidr]
+  }
 
   # Kubelet API
   ingress {
