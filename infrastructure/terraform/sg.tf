@@ -31,7 +31,7 @@ resource "aws_security_group" "k8s_master" {
     from_port   = 6443
     to_port     = 6443
     protocol    = "tcp"
-    cidr_blocks = [local.vpc_cidr]  # Allow from VPC
+    cidr_blocks = [local.vpc_cidr, local.my_ip]  # Allow from VPC and my IP
   }
 
   # etcd server client API
