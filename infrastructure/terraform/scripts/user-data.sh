@@ -30,6 +30,17 @@ snap install amazon-ssm-agent --classic
 systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
 systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
 
+echo "Waiting for network..."
+attempt=1
+while [ $attempt -le 30 ]; do
+    if curl -s --max-time 5 http://169.254.169.254/latest/meta-data/ >/dev/null 2>&1; then
+        echo "Network ready"
+        break
+    fi
+    sleep 10
+    attempt=$((attempt + 1))
+done
+
 # Get metadata using IMDSv2 tokens
 get_metadata() {
     local path=$1

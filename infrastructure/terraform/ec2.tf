@@ -22,11 +22,11 @@ resource "local_file" "private_key" {
 
 # K8s Master Node (Public Subnet)
 resource "aws_instance" "k8s_master" {
-  ami                    = local.ubuntu_ami_id
-  instance_type          = "t3.medium"
-  key_name              = aws_key_pair.k8s_key.key_name
-  subnet_id             = module.vpc.public_subnets[0]
-  iam_instance_profile  = aws_iam_instance_profile.ec2_profile.name
+  ami                  = local.ubuntu_ami_id
+  instance_type        = "t3.medium"
+  key_name             = aws_key_pair.k8s_key.key_name
+  subnet_id            = module.vpc.public_subnets[0]
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 
   vpc_security_group_ids = [
     aws_security_group.k8s_master.id,
@@ -42,16 +42,16 @@ resource "aws_instance" "k8s_master" {
   }
 
   tags = {
-    Name = "${var.repository_name}-k8s-master"
-    Type = "kubernetes-master"
+    Name                                           = "${var.repository_name}-k8s-master"
+    Type                                           = "kubernetes-master"
     "kubernetes.io/cluster/${var.repository_name}" = "owned"
   }
 }
 
 # K8s Worker Node (Private Subnet)
 resource "aws_instance" "k8s_worker" {
-  ami                   = local.ubuntu_ami_id
-  instance_type         = "t3.medium"
+  ami                  = local.ubuntu_ami_id
+  instance_type        = "t3.medium"
   key_name             = aws_key_pair.k8s_key.key_name
   subnet_id            = module.vpc.private_subnets[0]
   iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
@@ -70,16 +70,16 @@ resource "aws_instance" "k8s_worker" {
   }
 
   tags = {
-    Name = "${var.repository_name}-k8s-worker"
-    Type = "kubernetes-worker"
+    Name                                           = "${var.repository_name}-k8s-worker"
+    Type                                           = "kubernetes-worker"
     "kubernetes.io/cluster/${var.repository_name}" = "owned"
   }
 }
 
 # K8s GPU Worker Node (Private Subnet)
 resource "aws_instance" "k8s_gpu_worker" {
-  ami                   = local.ubuntu_ami_id
-  instance_type         = "g4dn.xlarge"
+  ami                  = local.ubuntu_ami_id
+  instance_type        = "g4dn.xlarge"
   key_name             = aws_key_pair.k8s_key.key_name
   subnet_id            = module.vpc.private_subnets[1]
   iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
@@ -93,13 +93,13 @@ resource "aws_instance" "k8s_gpu_worker" {
 
   root_block_device {
     volume_type = "gp3"
-    volume_size = 40  # Larger for GPU workloads
+    volume_size = 40 # Larger for GPU workloads
     encrypted   = true
   }
 
   tags = {
-    Name = "${var.repository_name}-k8s-gpu-worker"
-    Type = "kubernetes-gpu-worker"
+    Name                                           = "${var.repository_name}-k8s-gpu-worker"
+    Type                                           = "kubernetes-gpu-worker"
     "kubernetes.io/cluster/${var.repository_name}" = "owned"
   }
 }
