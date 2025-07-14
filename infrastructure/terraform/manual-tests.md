@@ -136,24 +136,8 @@ hostname
 
 **Expected Output (if user data worked):**
 
-- **Master:** `your-repo-name-node-i-0abc123def456789`
-- **Worker:** `your-repo-name-node-i-0def456abc789123`
+- **Master:** `your-repo-name-node-<node-id>`
+- **Worker:** `your-repo-name-node-<node-id>`
 - **GPU Worker:** `your-repo-name-gpu-worker`
 
 ---
-
-## **Test 8: SSM Agent Status**
-
-**Command:**
-
-```bash
-sudo systemctl status snap.amazon-ssm-agent.amazon-ssm-agent --no-pager
-```
-
-**Expected Output:**
-
-```
-● snap.amazon-ssm-agent.amazon-ssm-agent.service
-     Loaded: loaded (/etc/systemd/system/snap.amazon-ssm-agent.amazon-ssm-agent.service; enabled; vendor preset: enabled)
-     Active: active (running) since Mon 2024-12-16 15:23:30 UTC; 1h 5min ago
-```
