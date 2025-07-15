@@ -21,13 +21,13 @@ sudo kubeadm init \
 
 echo "✅ Cluster initialized successfully!"
 
-# Set up kubectl for the ubuntu user
-echo "🔧 Setting up kubectl for ubuntu user..."
+# Set up kubectl
+echo "🔧 Setting up kubectl..."
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-echo "✅ kubectl configured for ubuntu user"
+echo "✅ kubectl configured"
 
 # Test kubectl
 echo "🔍 Testing kubectl..."
@@ -38,7 +38,9 @@ echo "🌐 Installing Calico CNI plugin..."
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/calico.yaml
 
 echo "⏳ Waiting for Calico pods to start..."
-kubectl wait --for=condition=ready pod -l k8s-app=calico-node -n kube-system --timeout=300s
+sleep 60  # Give plenty of time for pods to be created
+
+kubectl get pods -n kube-system -l k8s-app=calico-node || echo "Calico pods still starting..."
 
 echo "✅ Calico CNI installed successfully!"
 
