@@ -58,8 +58,6 @@ echo "⚠️  REBOOT REQUIRED ⚠️"
 echo "The system needs to be rebooted to load the NVIDIA kernel modules."
 echo "After reboot, verify installation with:"
 echo "  nvidia-smi"
-echo "  kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.14.5/nvidia-device-plugin.yml"
-echo "  kubectl run gpu-test --image=nvidia/cuda:12.9.1-cudnn-devel-ubuntu20.04 --rm -it --restart=Never --overrides='{\"spec\":{\"containers\":[{\"name\":\"gpu-test\",\"image\":\"nvidia/cuda:12.9.1-cudnn-devel-ubuntu20.04\",\"resources\":{\"limits\":{\"nvidia.com/gpu\":\"1\"}},\"command\":[\"nvidia-smi\"]}]}}'"
 
 # Save reboot reminder
 echo "System needs reboot for NVIDIA drivers - $(date)" > /tmp/gpu-reboot-needed
