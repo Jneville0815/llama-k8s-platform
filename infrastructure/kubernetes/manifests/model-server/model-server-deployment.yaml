@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: llama-platform
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama-model-server
+  namespace: llama-platform
+  labels:
+    app: llama-model-server
+spec:
+  replicas: 1 # Only 1 replica since we have 1 GPU
+  selector:
+    matchLabels:
+      app: llama-model-server
+  template:
+    metadata:
+      labels:
+        app: llama-model-server
+    spec:
+      # Schedule on GPU worker node only
+      nodeSelector:
+        kubernetes.io/hostname: llama-k8s-platform-gpu-worker
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+        - name: vllm-server
+          image: 861819669871.dkr.ecr.us-east-1.amazonaws.com/llama-vllm-server:latest
+          imagePullPolicy: Always # Always pull latest from ECR
+
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+
+          # GPU resource allocation
+          resources:
+            requests:
+              nvidia.com/gpu: 1
+              memory: "8Gi"
+              cpu: "2"
+            limits:
+              nvidia.com/gpu: 1
+              memory: "12Gi"
+              cpu: "4"
+
+          # Environment variables
+          env:
+            - name: CUDA_VISIBLE_DEVICES
+              value: "0"
+            - name: HF_HOME
+              value: "/app/hf_cache"
+          # Optional: Add HuggingFace token if needed
+          # - name: HF_TOKEN
+          #   valueFrom:
+          #     secretKeyRef:
+          #       name: huggingface-token
+          #       key: token
+
+          # Health checks
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 300 # 5 minutes for model loading
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 300 # 5 minutes for model loading
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # Volume mounts for persistent model storage
+          volumeMounts:
+            - name: model-cache
+              mountPath: /app/models
+            - name: hf-cache
+              mountPath: /app/hf_cache
+
+      # Volumes for model persistence
+      volumes:
+        - name: model-cache
+          emptyDir:
+            sizeLimit: "20Gi" # Space for model files
+        - name: hf-cache
+          emptyDir:
+            sizeLimit: "10Gi" # Space for HuggingFace cache
+
+      # Restart policy
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llama-model-server
+  namespace: llama-platform
+  labels:
+    app: llama-model-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  selector:
+    app: llama-model-server
