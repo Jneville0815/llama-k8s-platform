@@ -59,9 +59,9 @@ def start_vllm_server():
     # Download model if needed
     model_path = download_model_if_needed()
     
-    # vLLM server configuration
+    # vLLM server configuration - don't include 'python' in the cmd
     cmd = [
-        "python", "-m", "vllm.entrypoints.openai.api_server",
+        "-m", "vllm.entrypoints.openai.api_server",
         "--model", model_path,
         "--host", "0.0.0.0",
         "--port", "8000",
@@ -89,17 +89,18 @@ def start_vllm_server():
     ])
     
     logger.info("Starting vLLM server with command:")
-    logger.info(" ".join(cmd))
+    logger.info("python " + " ".join(cmd))
     
     try:
-        # Start the server
-        subprocess.run(cmd, check=True)
+        # Use subprocess instead of exec
+        logger.info("Starting vLLM server...")
+        result = subprocess.run([sys.executable] + cmd, check=True)
     except subprocess.CalledProcessError as e:
         logger.error(f"vLLM server failed to start: {e}")
         sys.exit(1)
-    except KeyboardInterrupt:
-        logger.info("Received interrupt signal, shutting down...")
-        sys.exit(0)
+    except Exception as e:
+        logger.error(f"vLLM server failed to start: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     logger.info("🚀 Starting Llama 3.2-3B vLLM server...")

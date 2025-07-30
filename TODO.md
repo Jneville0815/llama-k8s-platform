@@ -1,0 +1,2 @@
+- dynamic ecr creds
+- persistent volumes

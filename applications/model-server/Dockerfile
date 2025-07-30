@@ -26,5 +26,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=300s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Use our custom startup script instead of the default vLLM server
-CMD ["python", "/app/start_server.py"]
+# Override the ENTRYPOINT and use our custom startup script
+ENTRYPOINT []
+CMD ["python3", "/app/start_server.py"]
