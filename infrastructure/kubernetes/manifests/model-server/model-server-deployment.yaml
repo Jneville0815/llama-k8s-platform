@@ -20,9 +20,26 @@ spec:
       labels:
         app: llama-model-server
     spec:
-      # Schedule on GPU worker node only
       nodeSelector:
         kubernetes.io/hostname: llama-k8s-platform-gpu-worker
+      # DNS bypass configuration
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - 8.8.8.8
+          - 1.1.1.1
+        searches:
+          - llama-platform.svc.cluster.local
+          - svc.cluster.local
+          - cluster.local
+        options:
+          - name: ndots
+            value: "2"
+          - name: edns0
+      tolerations:
+        - key: node.kubernetes.io/disk-pressure
+          operator: Exists
+          effect: NoSchedule
       imagePullSecrets:
         - name: ecr-secret
       containers:
@@ -52,12 +69,11 @@ spec:
               value: "0"
             - name: HF_HOME
               value: "/app/hf_cache"
-          # Optional: Add HuggingFace token if needed
-          # - name: HF_TOKEN
-          #   valueFrom:
-          #     secretKeyRef:
-          #       name: huggingface-token
-          #       key: token
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: huggingface-token
+                  key: token
 
           # Health checks
           livenessProbe:
@@ -78,14 +94,14 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
 
-          # Volume mounts for persistent model storage
+          # Volume mounts for temporary model storage
           volumeMounts:
             - name: model-cache
               mountPath: /app/models
             - name: hf-cache
               mountPath: /app/hf_cache
 
-      # Volumes for model persistence
+      # Volumes for temporary model storage
       volumes:
         - name: model-cache
           emptyDir:

@@ -93,8 +93,10 @@ resource "aws_instance" "k8s_gpu_worker" {
 
   root_block_device {
     volume_type = "gp3"
-    volume_size = 40 # Larger for GPU workloads
+    volume_size = 100 # Larger for GPU workloads
     encrypted   = true
+    iops        = 3000  # Better performance
+    throughput  = 125   # Better throughput
   }
 
   tags = {
