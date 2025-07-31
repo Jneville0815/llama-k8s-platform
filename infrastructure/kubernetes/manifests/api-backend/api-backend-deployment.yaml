@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: llama-platform
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama-api-backend
+  namespace: llama-platform
+  labels:
+    app: llama-api-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: llama-api-backend
+  template:
+    metadata:
+      labels:
+        app: llama-api-backend
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+        - name: api-backend
+          image: 861819669871.dkr.ecr.us-east-1.amazonaws.com/llama-api-backend:latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+          # Health checks
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llama-api-backend
+  namespace: llama-platform
+  labels:
+    app: llama-api-backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: llama-api-backend
