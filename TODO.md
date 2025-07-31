@@ -1,2 +1,3 @@
 - dynamic ecr creds
 - persistent volumes
+- fix dns problem

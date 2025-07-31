@@ -136,6 +136,14 @@ resource "aws_security_group" "k8s_cni" {
   vpc_id      = module.vpc.vpc_id
   description = "Security group for Kubernetes CNI networking"
 
+  ingress {
+    description = "IPIP tunnel for Calico"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "4" # IPIP protocol number
+    cidr_blocks = [local.vpc_cidr]
+  }
+
   # BGP (for Calico)
   ingress {
     description = "BGP for Calico"

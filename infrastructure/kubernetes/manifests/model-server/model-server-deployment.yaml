@@ -22,20 +22,6 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: llama-k8s-platform-gpu-worker
-      # DNS bypass configuration
-      dnsPolicy: "None"
-      dnsConfig:
-        nameservers:
-          - 8.8.8.8
-          - 1.1.1.1
-        searches:
-          - llama-platform.svc.cluster.local
-          - svc.cluster.local
-          - cluster.local
-        options:
-          - name: ndots
-            value: "2"
-          - name: edns0
       tolerations:
         - key: node.kubernetes.io/disk-pressure
           operator: Exists
