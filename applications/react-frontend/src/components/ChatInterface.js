@@ -15,7 +15,7 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("/chat", {
+      const response = await axios.post("/api/chat", {
         message: inputMessage,
         max_tokens: 150,
       });
