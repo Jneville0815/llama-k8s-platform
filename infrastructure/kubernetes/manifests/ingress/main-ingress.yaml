@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: main-ingress
+  namespace: llama-platform
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: chat.jimmyneville.com # Add this line
+      http:
+        paths:
+          - path: /api/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: llama-api-backend
+                port:
+                  number: 8080
+          - path: /(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: llama-react-frontend
+                port:
+                  number: 80
