@@ -11,7 +11,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: chat.jimmyneville.com # Add this line
+    - host: chat.jimmyneville.com
       http:
         paths:
           - path: /api/(.*)
