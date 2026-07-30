@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      sub_filter '</head>' '<script>window.grafanaBootData = {user:{}, settings:{appSubUrl:"/grafana"}};</script></head>';
+      sub_filter_once on;
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: chat.jimmyneville.com
+      http:
+        paths:
+          - path: /grafana/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: prometheus-grafana
+                port:
+                  number: 80
+          - path: /grafana
+            pathType: Exact
+            backend:
+              service:
+                name: prometheus-grafana
+                port:
+                  number: 80
