@@ -4,8 +4,6 @@ A self-hosted LLM inference platform that runs **LLaMA 3.2-3B** on a GPU-backed 
 
 Everything from the VPC to the chat window lives in this repo: infrastructure as code, cluster bootstrapping scripts, application source, container builds, and Kubernetes manifests.
 
-> **Live example:** `https://chat.jimmyneville.com`
-
 ---
 
 ## Contents
